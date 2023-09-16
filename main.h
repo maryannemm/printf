@@ -1,7 +1,12 @@
 #ifndef MAINH
 #define MAINH
 
+
 #include <stdarg.h>
+
+int write_char(char c);
+int write_str(const char *str);
+int write_int(int num);
 int _putchar(char c);
 int _printf(const char *format, ...);
 int print_char(va_list c);

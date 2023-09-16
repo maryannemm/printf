@@ -9,7 +9,6 @@
  *
  * Return: The number of characters printed (excluding the null byte).
  */
-
 int _printf(const char *format, ...)
 {
 	va_list args;
@@ -22,30 +21,31 @@ int _printf(const char *format, ...)
 		if (*format == '%')
 		{
 			format++;
+
 			switch (*format)
 			{
 				case 'c':
-					count += print_char(va_arg(args, int));
+					count += print_char(args);
 					break;
 				case 's':
-					count += print_string(va_arg(args, const char *));
+					count += print_string(args);
 					break;
 				case '%':
-					count += print_char('%');
+					count += write_char('%');
 					break;
 				case 'd':
 				case 'i':
-					count += print_int(va_arg(args, int));
+					count += print_int(args);
 					break;
 				default:
-					count += print_char('%');
-					count += print_char(*format);
+					count += write_char('%');
+					count += write_char(*format);
 					break;
 			}
 		}
 		else
 		{
-			count += print_char(*format);
+			count += write_char(*format);
 		}
 		format++;
 	}
