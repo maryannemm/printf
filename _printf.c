@@ -43,6 +43,40 @@ int _printf(const char *format, ...)
                 case '%':
                     count += write(1, "%", 1);
                     break;
+                case 'd':
+                case 'i':
+                {
+                    int num = va_arg(args, int);
+                    char buffer[12]; /* Sufficient for INT_MIN */
+                    int len = 0;
+
+                    if (num < 0)
+                    {
+                        count += write(1, "-", 1);
+                        num = -num;
+                    }
+
+                    if (num == 0)
+                    {
+                        count += write(1, "0", 1);
+                    }
+                    else
+                    {
+                        while (num > 0)
+                        {
+                            buffer[len] = num % 10 + '0';
+                            num /= 10;
+                            len++;
+                        }
+
+                        while (len > 0)
+                        {
+                            len--;
+                            count += write(1, &buffer[len], 1);
+                        }
+                    }
+                }
+                break;
                 default:
                     /* Unsupported conversion specifier, just print it as is */
                     count += write(1, "%", 1);
