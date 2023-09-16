@@ -1,64 +1,42 @@
-#include <stdarg.h>
 #include <unistd.h>
+#include <stdarg.h>
 #include "main.h"
 
 /**
- * _printf - Custom printf function.
- * @format: The format string.
+ * _printf - custom printf function
+ * @format: format string
  *
- * Return: The number of characters printed (excluding the null byte).
+ * Return: number of characters printed
  */
 int _printf(const char *format, ...)
 {
-	va_list args;
-	int count = 0; /* To keep track of the number of characters printed */
+    va_list args;
+    int count = 0;
+    int num;
 
-	va_start(args, format);
+    va_start(args, format);
 
-	while (*format)
-	{
-		if (*format == '%')
-		{
-			format++; /* Move past '%' */
+    while (*format)
+    {
+        if (*format == '%' && (*(format + 1) == 'd' || *(format + 1) == 'i'))
+        {
+            num = va_arg(args, int);
+            if (num < 0)
+            {
+                write(1, "-", 1);
+                num = -num;
+                count++;
+            }
+            count += write(1, num + '0', 1);
+        }
+        else
+        {
+            count += write(1, format, 1);
+        }
+        format++;
+    }
 
-			/* Handle conversion specifiers */
-			switch (*format)
-			{
-			case 'c':
-			{
-				char c = va_arg(args, int);
-				count += write(1, &c, 1);
-			}
-			break;
-			case 's':
-			{
-				const char *str = va_arg(args, const char *);
-				while (*str)
-				{
-					count += write(1, str, 1);
-					str++;
-				}
-			}
-			break;
-			case '%':
-				count += write(1, "%", 1);
-				break;
-			default:
-				/* Unsupported conversion specifier, just print it as is */
-				count += write(1, "%", 1);
-				count += write(1, format, 1);
-				break;
-			}
-		}
-		else
-		{
-			/* Regular character, just print it */
-			count += write(1, format, 1);
-		}
-		format++;
-	}
-
-	va_end(args);
-	return (count);
+    va_end(args);
+    return (count);
 }
 
