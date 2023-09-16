@@ -3,77 +3,62 @@
 #include "main.h"
 
 /**
-  * find_function - function that finds formats for _printf
-  * calls the corresponding function.
-  * @format: format (char, string, int, decimal)
-  * Return: NULL or function associated ;
-  */
-int (*find_function(const char *format))(va_list)
-{
-	unsigned int i = 0;
-	code_f find_f[] = {
-		{"c", print_char},
-		{"s", print_string},
-		{"i", print_int},
-		{"d", print_dec},
-		{"r", print_rev},
-		{"b", print_bin},
-		{"u", print_unsig},
-		{"o", print_octal},
-		{"x", print_x},
-		{"X", print_X},
-		{"R", print_rot13},
-		{NULL, NULL}
-	};
-
-	while (find_f[i].sc)
-	{
-		if (find_f[i].sc[0] == (*format))
-			return (find_f[i].f);
-		i++;
-	}
-	return (NULL);
-}
-/**
-  * _printf - function that produces output according to a format.
-  * @format: format (char, string, int, decimal)
-  * Return: size the output text;
-  */
+ * _printf - Custom printf function.
+ * @format: The format string.
+ *
+ * Return: The number of characters printed (excluding the null byte).
+ */
 int _printf(const char *format, ...)
 {
-	va_list ap;
-	int (*f)(va_list);
-	unsigned int i = 0, cprint = 0;
+	va_list args;
+	int count = 0; /* To keep track of the number of characters printed */
 
-	if (format == NULL)
-		return (-1);
-	va_start(ap, format);
-	while (format[i])
+	va_start(args, format);
+
+	while (*format)
 	{
-		while (format[i] != '%' && format[i])
+		if (*format == '%')
 		{
-			_putchar(format[i]);
-			cprint++;
-			i++;
+			format++; /* Move past '%' */
+
+			/* Handle conversion specifiers */
+			switch (*format)
+			{
+			case 'c':
+			{
+				char c = va_arg(args, int);
+				count += write(1, &c, 1);
+			}
+			break;
+			case 's':
+			{
+				const char *str = va_arg(args, const char *);
+				while (*str)
+				{
+					count += write(1, str, 1);
+					str++;
+				}
+			}
+			break;
+			case '%':
+				count += write(1, "%", 1);
+				break;
+			default:
+				/* Unsupported conversion specifier, just print it as is */
+				count += write(1, "%", 1);
+				count += write(1, format, 1);
+				break;
+			}
 		}
-		if (format[i] == '\0')
-			return (cprint);
-		f = find_function(&format[i + 1]);
-		if (f != NULL)
-		{
-			cprint += f(ap);
-			i += 2;
-			continue;
-		}
-		if (!format[i + 1])
-			return (-1);
-		_putchar(format[i]);
-		cprint++;
-		if (format[i + 1] == '%')
-			i += 2;
 		else
-			i++;
+		{
+			/* Regular character, just print it */
+			count += write(1, format, 1);
+		}
+		format++;
 	}
-	va_end(ap);
-	return (cprint);
+
+	va_end(args);
+	return (count);
 }
+
